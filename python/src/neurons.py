@@ -1,11 +1,11 @@
 import numpy as np
 
 class Neuron_State:
-    def __init__(self, V, u, spike, T=0):
+    def __init__(self, V, u, spike, T=None):
         self.V = V
         self.u = u
         self.spike = spike
-        if T == 0:
+        if T is None:
             self.T = np.zeros_like(V)
         else:
             self.T = T
@@ -94,7 +94,7 @@ def IZ_Neuron_stepper_euler_deterministic(states, params, I, dt):
     V = np.where(spike, c, V)
     u = np.where(spike, u + d, u)
 
-    return np.array([V, u, spike])
+    return Neuron_State(V, u, spike)
 
 def IZ_Neuron_stepper_adapt(states, params, I, dt):
         # states: states_per_neuron x n_neurons, params: params_per_neuron x n_neurons
@@ -182,8 +182,8 @@ def IZ_Neuron_stepper_adapt_deterministic(states, params, I, dt):
     spike = V >= eff_threshold
 
     if spike.any():
-        T = np.where(spike, T * threshold_mult, T)
+        T = np.where(spike, eff_threshold * threshold_mult - Vpeak, T)
         V = np.where(spike, c, V)
         u = np.where(spike, u + d, u)
 
-    return np.array([V, u, spike, T])
+    return Neuron_State(V, u, spike, T)

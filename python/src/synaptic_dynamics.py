@@ -3,7 +3,8 @@ import numpy as np
 # Simulating AMPA/NMDA/GABA_A/GABA_B synapses
 
 class SynapticDynamics:
-    def __init__(self, inhibitory_mask, dt, tau_AMPA=5, tau_NMDA=150, tau_GABA_A=6, tau_GABA_B=150, E_AMPA=0, E_NMDA=0, E_GABA_A=-70, E_GABA_B=-90):
+    def __init__(self, inhibitory_mask, dt, tau_AMPA=5, tau_NMDA=150, tau_GABA_A=6, tau_GABA_B=150, 
+                 E_AMPA=0, E_NMDA=0, E_GABA_A=-70, E_GABA_B=-90, weight_mult = 1.0):
         self.inhibitory_mask = inhibitory_mask
 
         self.dt = dt
@@ -27,6 +28,8 @@ class SynapticDynamics:
         self.GABA_A_decay = np.exp(-dt / tau_GABA_A)
         self.GABA_B_decay = np.exp(-dt / tau_GABA_B)
 
+        self.weight_mult = weight_mult
+
     def __call__(self, synaptic_input, neurons_V, input):
         # synaptic_input: n_neurons x 1
         # neurons_V: n_neurons x 1
@@ -49,12 +52,13 @@ class SynapticDynamics:
         self.g_GABA_A *= self.GABA_A_decay
         self.g_GABA_B *= self.GABA_B_decay
 
-        return input + I_AMPA + I_NMDA + I_GABA_A + I_GABA_B
+        return input + (I_AMPA + I_NMDA + I_GABA_A + I_GABA_B) * self.weight_mult
     
 
 # Optimized when tau_AMPA=tau_GABA_A, and tau_NMDA=tau_GABA_B
 class SynapticDynamics_Optimized:
-    def __init__(self, inhibitory_mask, dt, tau_ST=5, tau_LT=150, E_AMPA=0, E_NMDA=0, E_GABA_A=-70, E_GABA_B=-90):
+    def __init__(self, inhibitory_mask, dt, tau_ST=5, tau_LT=150, 
+                 E_AMPA=0, E_NMDA=0, E_GABA_A=-70, E_GABA_B=-90, weight_mult = 1.0):
         self.inhibitory_mask = inhibitory_mask
         self.excitatory_mask = ~inhibitory_mask
 
@@ -70,6 +74,8 @@ class SynapticDynamics_Optimized:
 
         self.ST_decay = np.exp(-dt / tau_ST)
         self.LT_decay = np.exp(-dt / tau_LT)
+
+        self.weight_mult = weight_mult
 
 
     def __call__(self, synaptic_input, neurons_V, input):
@@ -90,4 +96,4 @@ class SynapticDynamics_Optimized:
         self.g_ST *= self.ST_decay
         self.g_LT *= self.LT_decay
 
-        return input + I_ST + I_LT
+        return input + (I_ST + I_LT) * self.weight_mult

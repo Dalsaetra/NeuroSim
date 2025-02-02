@@ -20,7 +20,8 @@ class AxonalDynamics:
         if spikes.any():
             self.weights = weights
             self.T = T
-            np.where(spikes, self.update_registry, None)
+            for i in np.where(spikes)[0]:
+                self.update_registry(i)
 
         # Get the synaptic input from the registry where the delayed spike time is less than T and the weight is non-zero
         if len(self.registry) > 0:

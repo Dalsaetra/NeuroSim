@@ -9,10 +9,10 @@ class NeuralNetwork:
 
         # Connectivity matrix
         # M[i, j] = k, k is the neuron index where the jth axon of the ith neuron ends up
-        self.M = np.zeros((n_neurons, max_synapses), dtype=bool)
+        self.M = np.zeros((n_neurons, max_synapses), dtype=int)
         
         # Weight matrix
-        self.W = np.zeros((n_neurons, max_synapses))
+        self.W = np.zeros((n_neurons, max_synapses), dtype=float)
 
     # Initialize the connectivity matrix
     def set_connectivity(self, connectivity):
@@ -31,11 +31,11 @@ class NeuralNetwork:
     # Set weights to be random
     def set_random_weights(self, distribution='uniform', clip=None, **kwargs):
         if distribution == 'uniform':
-            self.W = np.random.uniform(**kwargs)
+            self.W = np.random.uniform(size=self.M.shape, **kwargs)
             if clip is not None:
                 self.W = np.clip(self.W, clip[0], clip[1])
         elif distribution == 'normal':
-            self.W = np.random.normal(**kwargs)
+            self.W = np.random.normal(size=self.M.shape, **kwargs)
             if clip is not None:
                 self.W = np.clip(self.W, clip[0], clip[1])
         else:
