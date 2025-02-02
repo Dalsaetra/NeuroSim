@@ -15,6 +15,7 @@ class AxonalDynamics:
         # weights: n_neurons x n_synapses
         # delays: n_neurons x n_synapses
         # connectivity: n_neurons x n_synapses
+        # T: current time
         # Returns: n_neurons x 1
         if spikes.any():
             self.weights = weights
@@ -28,9 +29,22 @@ class AxonalDynamics:
             weights = registry[:, 1]
             delayed_times = registry[:, 2]
             synaptic_input = np.zeros_like(spikes)
+            
+            # Create mask for valid spikes (delayed_times <= T and non-zero weights)
             mask = (delayed_times <= T) & (weights != 0)
-            synaptic_input[post_indices[mask]] = weights[mask]
-            self.registry = list(np.array(self.registry)[~mask])
+            masked_post_indices = post_indices[mask]
+            masked_weights = weights[mask]
+            
+            # Use bincount to efficiently sum weights for repeated indices
+            if len(masked_post_indices) > 0:
+                synaptic_input = np.bincount(
+                    masked_post_indices, 
+                    weights=masked_weights,
+                    minlength=len(synaptic_input)
+                )
+            
+            # Remove processed spikes from registry
+            self.registry = list(registry[~mask])
         else:
             synaptic_input = np.zeros_like(spikes)
 
