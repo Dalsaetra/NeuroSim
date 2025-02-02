@@ -29,10 +29,15 @@ class NeuralNetwork:
         self.W = weights
 
     # Set weights to be random
-    def set_random_weights(self, distribution='uniform', **kwargs):
+    def set_random_weights(self, distribution='uniform', clip=None, **kwargs):
         if distribution == 'uniform':
             self.W = np.random.uniform(**kwargs)
+            if clip is not None:
+                self.W = np.clip(self.W, clip[0], clip[1])
         elif distribution == 'normal':
             self.W = np.random.normal(**kwargs)
+            if clip is not None:
+                self.W = np.clip(self.W, clip[0], clip[1])
         else:
             raise ValueError('Invalid distribution')
+    

@@ -3,9 +3,9 @@ import numpy as np
 # Combination of axonal delay and weight multiplication to get the input to the synaptic dynamics
 
 class AxonalDynamics:
-    def __init__(self, connectivity, delays):
+    def __init__(self, connectivity):
         self.connectivity = connectivity
-        self.delays = delays
+        self.delays = np.zeros_like(connectivity)
 
         # Registry contains [post-index, weight (synaptic output), delayed spike time]
         self.registry = []
@@ -56,3 +56,18 @@ class AxonalDynamics:
         for j in range(self.connectivity.shape[1]):
             if self.connectivity[i, j] != -1:
                 self.registry.append(np.array([self.connectivity[i, j], self.weights[i, j], self.T + self.delays[i, j]]))
+
+    def set_delays(self, delays):
+        self.delays = delays
+
+    def set_random_delays(self, distribution='uniform', clip=None, **kwargs):
+        if distribution == 'uniform':
+            if clip is None:
+                clip = [0, 1]
+            self.delays = np.random.uniform(clip[0], clip[1], size=self.delays.shape)
+        elif distribution == 'normal':
+            self.delays = np.random.normal(size=self.delays.shape, **kwargs)
+            if clip is not None:
+                self.delays = np.clip(self.delays, clip[0], clip[1])
+        else:
+            raise ValueError('Invalid distribution')

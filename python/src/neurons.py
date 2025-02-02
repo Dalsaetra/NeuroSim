@@ -12,6 +12,15 @@ class Neuron_State:
 
     def __call__(self):
         return np.array([self.V, self.u, self.spike, self.T])
+    
+    def __getitem__(self, key):
+        return np.array([self.V[key], self.u[key], self.spike[key], self.T[key]])
+    
+    def __setitem__(self, key, value):
+        self.V[key] = value[0]
+        self.u[key] = value[1]
+        self.spike[key] = value[2]
+        self.T[key] = value[3]
 
 def IZ_Neuron_stepper_euler(states, params, I, dt):
     # states: states_per_neuron x n_neurons, params: params_per_neuron x n_neurons
